@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spootify Album Player</title>
+    <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css">
+    <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .album {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .album img {
+            width: 100px;
+            height: 100px;
+            margin-right: 20px;
+        }
+        .album-songs {
+            display: flex;
+            flex-direction: column;
+        }
+        .song {
+            margin-bottom: 10px;
+        }
+        .song button {
+            margin-left: 10px;
+        }
+        .album-title {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Spootify Albums</h1>
+<div id="albums"></div>
+
+<py-script>
+    import os
+    from js import document, console
+
+    # Path to the SpootifyAlbums folder
+    album_path = 'SpootifyAlbums'
+
+    # Check if the folder exists
+    if os.path.exists(album_path):
+        albums = os.listdir(album_path)
+        albums_div = document.getElementById('albums')
+
+        for album in albums:
+            album_folder = os.path.join(album_path, album)
+            
+            # Only process directories (albums)
+            if os.path.isdir(album_folder):
+                album_icon = os.path.join(album_folder, 'icon.png')
+                songs = [f for f in os.listdir(album_folder) if f.endswith('.mp3')]
+
+                # Create album container
+                album_div = document.createElement('div')
+                album_div.className = 'album'
+
+                # Add album name as a heading
+                album_title = document.createElement('h2')
+                album_title.className = 'album-title'
+                album_title.innerText = album  # Display the folder name as album title
+                albums_div.appendChild(album_title)
+
+                # Add album icon
+                img = document.createElement('img')
+                img.src = album_icon
+                album_div.appendChild(img)
+
+                # Create song list
+                song_list_div = document.createElement('div')
+                song_list_div.className = 'album-songs'
+
+                for song in songs:
+                    song_div = document.createElement('div')
+                    song_div.className = 'song'
+
+                    # Remove the .mp3 extension from the song name for display
+                    song_display_name = os.path.splitext(song)[0]
+
+                    # Song name
+                    song_name = document.createElement('span')
+                    song_name.innerText = song_display_name
+
+                    # Play button
+                    play_button = document.createElement('button')
+                    play_button.innerText = 'Play'
+                    
+                    # JavaScript to play the song
+                    play_button.onclick = lambda e, song=song: play_song(album_folder, song)
+
+                    song_div.appendChild(song_name)
+                    song_div.appendChild(play_button)
+                    song_list_div.appendChild(song_div)
+
+                album_div.appendChild(song_list_div)
+                albums_div.appendChild(album_div)
+
+    else:
+        console.log(f"Folder {album_path} does not exist")
+
+    def play_song(folder, song):
+        song_path = os.path.join(folder, song)
+        audio_element = document.createElement('audio')
+        audio_element.src = song_path
+        audio_element.play()
+</py-script>
+
+</body>
+</html>
